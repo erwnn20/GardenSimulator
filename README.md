@@ -33,8 +33,8 @@ Ce projet met en pratique la programmation orientée objet (POO) en Python, la m
 ## 🚀 Installation et Exécution
 1. **Cloner le projet** :
    ```bash
-   git clone https://github.com/votre-utilisateur/simulateur-jardin.git
-   cd simulateur-jardin
+   git clone https://github.com/erwnn20/GardenSimulator.git
+   cd GardenSimulator
    ```
 2. Exécuter :
    ```bash
