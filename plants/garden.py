@@ -14,7 +14,7 @@ class Garden(Data):
 
     def __str__(self) -> str:
         return (
-                f'{self.name}: {len(self.plantations(Garden.PlantationSelectType.FILLED))}/{len(self.plantations())} plant(s)'
+                f'{self.name}: {len(self.plantations(Garden.PlantationSelectType.SEEDED))}/{len(self.plantations())} plant(s)'
                 '\n  - ' + '\n  - '.join([str(p) for p in self.plantations()]))
 
     def __add__(self, new_plant: Plantation | list[Plantation]):
@@ -24,25 +24,29 @@ class Garden(Data):
     class PlantationSelectType(Enum):
         ALL = 0
         EMPTY = 1
-        FILLED = 2
+        SOILED = 2
+        SOILED_NO_SEED = 3
+        SEEDED = 4
 
     def plantations(self, plantation_select_type: PlantationSelectType = PlantationSelectType.ALL) -> list[Plantation]:
-        return [plant for plant in self._plantations if {
+        return [plantation for plantation in self._plantations if {
             Garden.PlantationSelectType.ALL: True,
-            Garden.PlantationSelectType.EMPTY: plant.is_empty,
-            Garden.PlantationSelectType.FILLED: not plant.is_empty,
+            Garden.PlantationSelectType.EMPTY: plantation.is_empty,
+            Garden.PlantationSelectType.SOILED: plantation.is_soiled,
+            Garden.PlantationSelectType.SOILED_NO_SEED: plantation.is_soiled_no_seed,
+            Garden.PlantationSelectType.SEEDED: plantation.is_seeded,
         }[plantation_select_type]]
 
     def str(self) -> str:
-        avg_health = 0.0 if len(self.plantations(Garden.PlantationSelectType.FILLED)) == 0 else sum(
-            [p1.plant.health for p1 in self.plantations(Garden.PlantationSelectType.FILLED)]) / len(
-            self.plantations(Garden.PlantationSelectType.FILLED))
-        avg_growth = 0.0 if len(self.plantations(Garden.PlantationSelectType.FILLED)) == 0 else sum(
-            [p2.plant.growth for p2 in self.plantations(Garden.PlantationSelectType.FILLED)]) / len(
-            self.plantations(Garden.PlantationSelectType.FILLED))
+        avg_health = 0.0 if len(self.plantations(Garden.PlantationSelectType.SEEDED)) == 0 else sum(
+            [p1.plant.health for p1 in self.plantations(Garden.PlantationSelectType.SEEDED)]) / len(
+            self.plantations(Garden.PlantationSelectType.SEEDED))
+        avg_growth = 0.0 if len(self.plantations(Garden.PlantationSelectType.SEEDED)) == 0 else sum(
+            [p2.plant.growth for p2 in self.plantations(Garden.PlantationSelectType.SEEDED)]) / len(
+            self.plantations(Garden.PlantationSelectType.SEEDED))
 
         return (
-            f"Garden {self.name}: {len(self.plantations(Garden.PlantationSelectType.FILLED))}/{len(self.plantations(Garden.PlantationSelectType.ALL))} plant(s) "
+            f"Garden {self.name}: {len(self.plantations(Garden.PlantationSelectType.SEEDED))}/{len(self.plantations(Garden.PlantationSelectType.ALL))} plant(s) "
             f"[avg -> health: {avg_health:.1f}% ; growth: {avg_growth * 100:.1f}%] ")
 
     def select_plantations(self, message: str, *, plantation_select_type: PlantationSelectType, size: int | None = None,
@@ -81,7 +85,7 @@ class Garden(Data):
                                                             f'Water: {p.water_content:.2f}/{p.max_water_content:.2f} L')
 
         plants = self.select_plantations('Which plants do you want to water?',
-                                         plantation_select_type=Garden.PlantationSelectType.ALL,
+                                         plantation_select_type=Garden.PlantationSelectType.SOILED,
                                          plantation_str=plant_str)
 
         print()
@@ -124,7 +128,7 @@ class Garden(Data):
         fertilizer = FertilizerType.select()
         print()
         plants = self.select_plantations('Which plants do you want to fertilize?',
-                                         plantation_select_type=Garden.PlantationSelectType.ALL,
+                                         plantation_select_type=Garden.PlantationSelectType.SOILED,
                                          plantation_str=plant_str)
 
         print()
@@ -139,11 +143,11 @@ class Garden(Data):
         return False
 
     def maintain(self) -> bool:
-        if self.plantations(Garden.PlantationSelectType.FILLED):
-            for plantation in self.plantations(Garden.PlantationSelectType.FILLED): plantation.plant.maintain()
+        if self.plantations(Garden.PlantationSelectType.SEEDED):
+            for plantation in self.plantations(Garden.PlantationSelectType.SEEDED): plantation.plant.maintain()
 
             print(
-                f"You've tended the {len(self.plantations(Garden.PlantationSelectType.FILLED))} plants of the {self.name} garden.\n")
+                f"You've tended the {len(self.plantations(Garden.PlantationSelectType.SEEDED))} plants of the {self.name} garden.\n")
             return True
 
         print(f'There are no plants to maintain in the {self.name} garden.\n')

@@ -29,12 +29,24 @@ class Plantation:
 
     @property
     def is_empty(self) -> bool:
-        return self.plant is None
+        return self.plant is None and self.soil is None
+
+    @property
+    def is_soiled(self) -> bool:
+        return self.soil is not None
+
+    @property
+    def is_soiled_no_seed(self) -> bool:
+        return self.is_soiled and self.plant is None
+
+    @property
+    def is_seeded(self) -> bool:
+        return self.plant is not None
 
     def plant_seed(self, new_plant: Plant) -> 'Plantation':
-        if not self.is_empty:
+        if self.is_seeded:
             raise PlantationException.Seed(f'a plant is already growing in this {type(self)} -> {repr(self.plant)}')
-        if self.soil is None:
+        if not self.is_soiled:
             raise PlantationException.Soil(f'there is no soil in which to plant the plant')
         if new_plant.size > self.size:
             raise PlantationException.Seed(f'this {type(self)} is too small for {repr(self.plant)}')
@@ -47,7 +59,7 @@ class Plantation:
         return self
 
     def change_soil(self, new_soil: Soil) -> 'Plantation':
-        if not self.is_empty:
+        if self.is_seeded:
             raise PlantationException.Soil(
                 f'you cannot change plant if this {type(self)} contains a plant. self.plant: {repr(self.plant)}')
 
@@ -55,7 +67,7 @@ class Plantation:
         return self
 
     def watering_up(self, water_quantity: float) -> float:
-        if self.soil is None:
+        if not self.is_soiled:
             raise PlantationException.Water('no soil to water')
 
         added = min(self.water_content + water_quantity, self.max_water_content)
@@ -97,7 +109,7 @@ class Plantation:
         )
 
     def fertilize(self, fertiliser: FertilizerType) -> 'Plantation':
-        if self.soil is None:
+        if not self.is_soiled:
             raise PlantationException.Soil('no soil to fertilize')
         self.soil.fertilize(fertiliser)
         return self
