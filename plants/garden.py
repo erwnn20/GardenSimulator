@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Callable
 
 from data.save import Data
@@ -9,37 +10,52 @@ from utils.prompt import Prompt
 class Garden(Data):
     def __init__(self, name: str):
         self.name = name
-        self.plantations: list[Plantation] = []
+        self._plantations: list[Plantation] = []
 
     def __str__(self) -> str:
-        return (f'{self.name}: {len(self.plants)}/{len(self.plantations)} plant(s)'
-                '\n  - ' + '\n  - '.join([str(p) for p in self.plantations]))
+        return (
+                f'{self.name}: {len(self.plantations(Garden.PlantationSelectType.FILLED))}/{len(self.plantations())} plant(s)'
+                '\n  - ' + '\n  - '.join([str(p) for p in self.plantations()]))
 
     def __add__(self, new_plant: Plantation | list[Plantation]):
-        self.plantations += new_plant if isinstance(new_plant, list) else [new_plant]
+        self._plantations += new_plant if isinstance(new_plant, list) else [new_plant]
         return self
 
-    @property
-    def plants(self) -> list[Plantation]:
-        return [plant for plant in self.plantations if not plant.is_empty]
+    class PlantationSelectType(Enum):
+        ALL = 0
+        EMPTY = 1
+        FILLED = 2
+
+    def plantations(self, plantation_select_type: PlantationSelectType = PlantationSelectType.ALL) -> list[Plantation]:
+        return [plant for plant in self._plantations if {
+            Garden.PlantationSelectType.ALL: True,
+            Garden.PlantationSelectType.EMPTY: plant.is_empty,
+            Garden.PlantationSelectType.FILLED: not plant.is_empty,
+        }[plantation_select_type]]
 
     def str(self) -> str:
-        avg_health = 0.0 if len(self.plants) == 0 else sum([p1.plant.health for p1 in self.plants]) / len(self.plants)
-        avg_growth = 0.0 if len(self.plants) == 0 else sum([p2.plant.growth for p2 in self.plants]) / len(self.plants)
+        avg_health = 0.0 if len(self.plantations(Garden.PlantationSelectType.FILLED)) == 0 else sum(
+            [p1.plant.health for p1 in self.plantations(Garden.PlantationSelectType.FILLED)]) / len(
+            self.plantations(Garden.PlantationSelectType.FILLED))
+        avg_growth = 0.0 if len(self.plantations(Garden.PlantationSelectType.FILLED)) == 0 else sum(
+            [p2.plant.growth for p2 in self.plantations(Garden.PlantationSelectType.FILLED)]) / len(
+            self.plantations(Garden.PlantationSelectType.FILLED))
 
-        return (f"Garden {self.name}: {len(self.plants)}/{len(self.plantations)} plant(s) "
-                f"[avg -> health: {avg_health:.1f}% ; growth: {avg_growth * 100:.1f}%] ")
+        return (
+            f"Garden {self.name}: {len(self.plantations(Garden.PlantationSelectType.FILLED))}/{len(self.plantations(Garden.PlantationSelectType.ALL))} plant(s) "
+            f"[avg -> health: {avg_health:.1f}% ; growth: {avg_growth * 100:.1f}%] ")
 
-    def select_plantations(self, message: str, *, empty: bool,
+    def select_plantations(self, message: str, *, plantation_select_type: PlantationSelectType, size: int | None = None,
                            plantation_str: Callable[[Plantation], str] = lambda p: str(p)) -> list[Plantation]:
         out_list: list[Plantation] = []
-        plant_list: list[Plantation] = self.plantations if empty else self.plants
+        plant_list: list[Plantation] = self.plantations(plantation_select_type)
 
         if not plant_list:
-            print(f'there are no {"plantations" if empty else "plants"} in {self.name}')
+            print(
+                f'there are no {plantation_select_type.name.lower() if plantation_select_type != Garden.PlantationSelectType.ALL else ""} plantation in {self.name}')
             return out_list
 
-        while True:
+        while (len(out_list) < size) if size else True:
             choices = [
                 'All',
                 *[p for p in plant_list if p not in out_list],
@@ -57,12 +73,16 @@ class Garden(Data):
                     out_list.append(selected)
                     print()
 
+        return out_list
+
     def watering(self) -> bool:
         plant_str: Callable[[Plantation], str] = lambda p: (f'Soil: {type(p.soil).__name__} | '
                                                             f'{"Plant: " + f"{type(p.plant).__name__} (health: {p.plant.health:.1f}%, growth: {p.plant.growth:.1f}%, water needs: {p.plant.water_needs:.2f} L)" if p.plant else f"No plant"} | '
                                                             f'Water: {p.water_content:.2f}/{p.max_water_content:.2f} L')
 
-        plants = self.select_plantations('Which plants do you want to water?', empty=True, plantation_str=plant_str)
+        plants = self.select_plantations('Which plants do you want to water?',
+                                         plantation_select_type=Garden.PlantationSelectType.ALL,
+                                         plantation_str=plant_str)
 
         print()
         if plants:
@@ -103,7 +123,9 @@ class Garden(Data):
 
         fertilizer = FertilizerType.select()
         print()
-        plants = self.select_plantations('Which plants do you want to fertilize?', empty=True, plantation_str=plant_str)
+        plants = self.select_plantations('Which plants do you want to fertilize?',
+                                         plantation_select_type=Garden.PlantationSelectType.ALL,
+                                         plantation_str=plant_str)
 
         print()
         if plants:
@@ -117,10 +139,11 @@ class Garden(Data):
         return False
 
     def maintain(self) -> bool:
-        if self.plants:
-            for plantation in self.plants: plantation.plant.maintain()
+        if self.plantations(Garden.PlantationSelectType.FILLED):
+            for plantation in self.plantations(Garden.PlantationSelectType.FILLED): plantation.plant.maintain()
 
-            print(f"You've tended the {len(self.plants)} plants of the {self.name} garden.\n")
+            print(
+                f"You've tended the {len(self.plantations(Garden.PlantationSelectType.FILLED))} plants of the {self.name} garden.\n")
             return True
 
         print(f'There are no plants to maintain in the {self.name} garden.\n')
