@@ -175,3 +175,6 @@ cython_debug/
 
 # subject
 Python - Simulateur de jardin virtuel.pdf
+
+# tests files
+*test*
