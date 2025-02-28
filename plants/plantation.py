@@ -2,21 +2,37 @@ from dataclasses import dataclass
 from enum import Enum
 
 from exceptions import PlantationException
+from plants.add.fertilizer import FertilizerType
 from plants.plant import Plant
-from plants.soil import Soil, Fertilizer
+from plants.soil import Soil
 
 
 class Plantation:
-    def __init__(self, size: int, soil: Soil, max_water_content: float, *, water_content: float = 0,
-                 plant: Plant | None = None):
+    def __init__(self, *, size: int,
+                 soil: Soil,
+                 plant: Plant | None = None,
+                 max_water_content: float,
+                 water_content: float = 0):
         self.size = size
         self.soil = soil
         self.max_water_content = max_water_content
         self.water_content = water_content
         self.plant = plant
 
+    class StrType(Enum):
+        WATER = 0
+
+    def __str__(self) -> str:
+        return (f'Soil: {type(self.soil).__name__} | '
+                f'{f"Plant: {self.plant}" if self.plant else f"No plant (size: {self.size})"} | '
+                f'Water: {self.water_content:.2f}/{self.max_water_content:.2f} L')
+
+    @property
+    def is_empty(self) -> bool:
+        return self.plant is None
+
     def plant_seed(self, new_plant: Plant) -> 'Plantation':
-        if self.plant is not None:
+        if not self.is_empty:
             raise PlantationException.Seed(f'a plant is already growing in this {type(self)} -> {repr(self.plant)}')
         if self.soil is None:
             raise PlantationException.Soil(f'there is no soil in which to plant the plant')
@@ -31,7 +47,7 @@ class Plantation:
         return self
 
     def change_soil(self, new_soil: Soil) -> 'Plantation':
-        if self.plant is not None:
+        if not self.is_empty:
             raise PlantationException.Soil(
                 f'you cannot change plant if this {type(self)} contains a plant. self.plant: {repr(self.plant)}')
 
@@ -80,7 +96,7 @@ class Plantation:
             ultra_status=clamped_bonus < 0,
         )
 
-    def fertilize(self, fertiliser: Fertilizer) -> 'Plantation':
+    def fertilize(self, fertiliser: FertilizerType) -> 'Plantation':
         if self.soil is None:
             raise PlantationException.Soil('no soil to fertilize')
         self.soil.fertilize(fertiliser.value)

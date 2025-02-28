@@ -1,22 +1,29 @@
 from abc import ABC
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from pydantic import confloat
 
-from plants.plantation import Plantation
-from plants.soil import Soil
+if TYPE_CHECKING:
+    from plants.plantation import Plantation
 
 
 class Plant(ABC):
-    def __init__(self, water_needs: float, growth_rate: confloat(gt=0, le=1), size: int, fertilize_limit: int, *,
-                 growth: float = 0, fertilized_for: int = 0):
+    def __init__(self, *, water_needs: float, growth_rate: confloat(gt=0, le=15), size: int, fertilizer_limit: float,
+                 growth: float = 0, fertilizer_quantity: float = 0):
         self.water_needs = water_needs
         self.growth_rate: float = growth_rate
         self.growth = growth
         self.size = size
-        self.fertilize_limit = fertilize_limit
-        self.fertilized_for = fertilized_for
+        self.fertilizer_limit = fertilizer_limit
+        self.fertilizer_quantity = fertilizer_quantity
         self.health = 100.0
+
+    def __str__(self) -> str:
+        return f'{type(self).__name__} (health: {self.health:.1f}%, growth: {self.growth:.1f}%)'
+
+    def __repr__(self):
+        return f'{type(self)}(health={self.health:.1f}%, growth={self.growth:.1f}%)'
 
     @dataclass
     class GrowthReport:
@@ -24,20 +31,20 @@ class Plant(ABC):
         class Growth:
             total: float
             by_water: float
-            fertilizer_multiplier: float
+            soil_multiplier: float
 
         @dataclass
         class Damages:
             total: float
             by_soil: float
-            soil_humidity_status: Plantation.Humidity.Status
+            soil_humidity_status: 'Plantation.Humidity.Status'
             by_fertilizer: float
 
         growth: Growth
         damages: Damages
         water_consumption: float
 
-    def grow(self, p: Plantation) -> GrowthReport:
+    def grow(self, p: 'Plantation') -> GrowthReport:
         soil_humidity = p.soil_humidity
 
         # plant growth
@@ -45,21 +52,19 @@ class Plant(ABC):
         water_efficiency = water_consumption / self.water_needs
         growth_water = self.growth_rate * water_efficiency * soil_humidity.bonus
 
-        fertilized = Soil.Bonus.Fertilized in p.soil.bonus and p.soil.bonus[Soil.Bonus.Fertilized] > 0
-        fertilizer_multiplier = (p.soil.growth_bonus + 0.1 if fertilized else 0) if growth_water > 0 else 1
+        fertilizer_bonus = sum(
+            [fertilizer.value.efficiency for fertilizer, turn in p.soil.fertilizers.items() if turn > 0])
+        soil_multiplier = (p.soil.growth_bonus + fertilizer_bonus) if growth_water > 0 else 1
 
-        growth_total = growth_water * fertilizer_multiplier
+        growth_total = growth_water * soil_multiplier
         self.growth += growth_total
 
         # plant damages
         damages_by_water = soil_humidity.status.value * 2 if soil_humidity.ultra_status else 1
 
-        if fertilized:
-            self.fertilized_for += 1
-        else:
-            self.fertilized_for = 0
-        damages_by_fertilizer = 2 * (
-                self.fertilize_limit - self.fertilized_for) if self.fertilized_for > self.fertilize_limit else 0
+        self.fertilizer_quantity = max(0.0, self.fertilizer_quantity - 0.1) + fertilizer_bonus
+        damages_by_fertilizer = (2 * (
+                    self.fertilizer_limit - self.fertilizer_quantity)) if self.fertilizer_quantity > self.fertilizer_limit else 0
 
         damages = damages_by_water + damages_by_fertilizer
         self.health -= damages
@@ -68,7 +73,7 @@ class Plant(ABC):
             growth=Plant.GrowthReport.Growth(
                 total=growth_total,
                 by_water=growth_water,
-                fertilizer_multiplier=fertilizer_multiplier),
+                soil_multiplier=soil_multiplier),
             damages=Plant.GrowthReport.Damages(
                 total=damages,
                 by_soil=damages_by_water,
@@ -80,6 +85,3 @@ class Plant(ABC):
     def maintain(self):
         self.growth += 0.1
         self.health += 0.2
-
-    def __repr__(self):
-        return f'{type(self)}(health={self.health}, growth={self.growth})'
