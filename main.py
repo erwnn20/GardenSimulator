@@ -46,14 +46,11 @@ class Game:
                                      'Exit'
                                  ], lambda x: x).element:
             case 'Watering':
-                game.save.garden.watering()
-                return True
+                return game.save.garden.watering()
             case 'Fertilizing':
-                game.save.garden.fertilizing()
-                return False
+                return game.save.garden.fertilizing()
             case 'Pruning/Maintenance':
-                game.save.garden.maintain()
-                return True
+                return game.save.garden.maintain()
             case 'Exit':
                 return True
         return False

@@ -10,7 +10,7 @@ class Fertilizer:
     efficiency: float
 
     def __str__(self):
-        return f'{self.efficiency:.2f} for {self.turn} turn(s)'
+        return f'+{self.efficiency * 100:.0f}% for {self.turn} turn(s)'
 
 
 class FertilizerType(Enum):

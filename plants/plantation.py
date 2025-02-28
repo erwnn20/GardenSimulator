@@ -99,5 +99,5 @@ class Plantation:
     def fertilize(self, fertiliser: FertilizerType) -> 'Plantation':
         if self.soil is None:
             raise PlantationException.Soil('no soil to fertilize')
-        self.soil.fertilize(fertiliser.value)
+        self.soil.fertilize(fertiliser)
         return self

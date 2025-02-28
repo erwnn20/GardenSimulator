@@ -10,7 +10,7 @@ class Soil(ABC):
         self.fertilizers: dict[FertilizerType, int] = {}
 
     def fertilize(self, fertilizer: FertilizerType) -> 'Soil':
-        if fertilizer not in self.fertilizers.keys():
+        if fertilizer not in self.fertilizers:
             self.fertilizers[fertilizer] = 0
 
         self.fertilizers[fertilizer] += fertilizer.value.turn
