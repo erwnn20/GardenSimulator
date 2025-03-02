@@ -60,12 +60,15 @@ class Game:
                                  [
                                      'Plant a new seed',
                                      'Uproot a plant',
+                                     'Change soil',
                                      'Exit'
                                  ], lambda x: x).element:
             case 'Plant a new seed':
                 return game.save.garden.plant_new()
             case 'Uproot a plant':
                 return game.save.garden.uproot(self.save.user)
+            case 'Change soil':
+                return game.save.garden.change_soil()
             case 'Exit':
                 pass
 

@@ -14,11 +14,11 @@ class Plant(ABC):
     def __init__(self, *, water_needs: confloat(gt=0), growth_rate: confloat(gt=0, le=15), size: conint(gt=0, le=10),
                  fertilizer_limit: confloat(gt=0, le=1.5),
                  growth: float = 0, fertilizer_quantity: float = 0):
-        self.water_needs = water_needs
+        self.water_needs: float = water_needs
         self.growth_rate: float = growth_rate
         self.growth = growth
-        self.size = size
-        self.fertilizer_limit = fertilizer_limit
+        self.size: int = size
+        self.fertilizer_limit: float = fertilizer_limit
         self.fertilizer_quantity = fertilizer_quantity
         self.health = 100.0
 
@@ -57,7 +57,7 @@ class Plant(ABC):
 
         fertilizer_bonus = sum(
             [fertilizer.value.efficiency for fertilizer, turn in p.soil.fertilizers.items() if turn > 0])
-        soil_multiplier = (p.soil.growth_bonus + fertilizer_bonus) if growth_water > 0 else 1
+        soil_multiplier = 1 + (p.soil.growth_bonus + fertilizer_bonus if growth_water > 0 else 0)
 
         growth_total = growth_water * soil_multiplier
         self.growth += growth_total

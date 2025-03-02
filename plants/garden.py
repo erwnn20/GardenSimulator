@@ -4,8 +4,9 @@ from typing import Callable
 from data.save import Data
 from exceptions import PlantationException
 from plants.add.fertilizer import FertilizerType
-from plants.plant import PlantType, Plant
+from plants.plant import PlantType
 from plants.plantation import Plantation
+from plants.soil import SoilType
 from user.user import User
 from utils.prompt import Prompt
 
@@ -181,3 +182,19 @@ class Garden(Data):
                                         size=1)[0].dig_up()
 
         return False
+
+    def change_soil(self) -> bool:
+        plantation = self.select_plantations('Where do you want to change the soil ?',
+                                             plantation_select_type=Garden.PlantationSelectType.SOILED,
+                                             size=1)[0]
+
+        print(f'Selected: {plantation}')
+        soil_type = SoilType.select()
+
+        try:
+            plantation.change_soil(soil_type())
+        except PlantationException.Soil as ex:
+            print(f'{ex.message.capitalize()}. Please remove this plant before changing the soil.')
+            return False
+
+        return True

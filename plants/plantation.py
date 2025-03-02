@@ -59,7 +59,7 @@ class Plantation:
     def change_soil(self, new_soil: Soil) -> 'Plantation':
         if self.is_seeded:
             raise PlantationException.Soil(
-                f'you cannot change plant if this {type(self)} contains a plant. self.plant: {repr(self.plant)}')
+                f'you cannot change soil if this {type(self).__name__} contains a plant. current plant: {self.plant}')
 
         self.soil = new_soil
         return self
