@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from plants.garden import Garden
+    from user.user import User
 
 
 @dataclass
 class Save:
     name: str
-    user: 'Data'
+    user: 'User'
     garden: 'Garden'
 
     def __str__(self) -> str:

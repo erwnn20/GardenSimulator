@@ -59,10 +59,13 @@ class Game:
         match self.prompt.select('What do you want to do ?',
                                  [
                                      'Plant a new seed',
+                                     'Uproot a plant',
                                      'Exit'
                                  ], lambda x: x).element:
             case 'Plant a new seed':
                 return game.save.garden.plant_new()
+            case 'Uproot a plant':
+                return game.save.garden.uproot(self.save.user)
             case 'Exit':
                 pass
 

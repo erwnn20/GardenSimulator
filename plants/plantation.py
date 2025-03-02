@@ -54,9 +54,10 @@ class Plantation:
         self.plant = new_plant
         return self
 
-    def dig_up(self) -> 'Plantation':
+    def dig_up(self) -> Plant:
+        plant = self.plant
         self.plant = None
-        return self
+        return plant
 
     def change_soil(self, new_soil: Soil) -> 'Plantation':
         if self.is_seeded:

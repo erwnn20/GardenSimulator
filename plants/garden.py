@@ -6,6 +6,7 @@ from exceptions import PlantationException
 from plants.add.fertilizer import FertilizerType
 from plants.plant import PlantType, Plant
 from plants.plantation import Plantation
+from user.user import User
 from utils.prompt import Prompt
 
 
@@ -173,3 +174,10 @@ class Garden(Data):
             return False
 
         return True
+
+    def uproot(self, user: User) -> bool:
+        plant = self.select_plantations('Which plants do you want to uproot?',
+                                        plantation_select_type=Garden.PlantationSelectType.SEEDED,
+                                        size=1)[0].dig_up()
+
+        return False
