@@ -54,7 +54,7 @@ class TreeType(Enum):
                 f'growth rate: {tree_instance.growth_rate:.1f}%)')
 
     @staticmethod
-    def select() -> type(Tree):
+    def select() -> type[Tree]:
         return Prompt.select(
             prompt='Select a type of Tree:',
             choices=list(TreeType),

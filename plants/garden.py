@@ -164,7 +164,7 @@ class Garden(Data):
                                              size=1)[0]
 
         print(f'Selected: {plantation}')
-        plant_type: type(Plant) = PlantType.select()
+        plant_type = PlantType.select()
 
         try:
             plantation.plant_seed(plant_type())

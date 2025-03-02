@@ -19,9 +19,6 @@ class Plantation:
         self.water_content = water_content
         self.plant = plant
 
-    class StrType(Enum):
-        WATER = 0
-
     def __str__(self) -> str:
         return (f'Soil: {type(self.soil).__name__} | '
                 f'{f"Plant: {self.plant}" if self.plant else f"No plant (size: {self.size})"} | '

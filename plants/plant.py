@@ -107,7 +107,7 @@ class PlantType(Enum):
         return self._name_.capitalize()
 
     @staticmethod
-    def select() -> type(Plant):
+    def select() -> type[Plant]:
         return Prompt.select(
             prompt='Select a type of Plant:',
             choices=list(PlantType),

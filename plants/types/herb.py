@@ -58,7 +58,7 @@ class HerbType(Enum):
                 f'growth rate: {herb_instance.growth_rate:.1f}%)')
 
     @staticmethod
-    def select() -> type(Herb):
+    def select() -> type[Herb]:
         return Prompt.select(
             prompt='Select a type of Herb:',
             choices=list(HerbType),

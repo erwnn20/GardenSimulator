@@ -59,7 +59,7 @@ class VegetableType(Enum):
                 f'growth rate: {vegetable_instance.growth_rate:.1f}%)')
 
     @staticmethod
-    def select() -> type(Vegetable):
+    def select() -> type[Vegetable]:
         return Prompt.select(
             prompt='Select a type of Vegetable:',
             choices=list(VegetableType),
