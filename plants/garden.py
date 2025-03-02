@@ -2,7 +2,9 @@ from enum import Enum
 from typing import Callable
 
 from data.save import Data
+from exceptions import PlantationException
 from plants.add.fertilizer import FertilizerType
+from plants.plant import PlantType, Plant
 from plants.plantation import Plantation
 from utils.prompt import Prompt
 
@@ -14,8 +16,9 @@ class Garden(Data):
 
     def __str__(self) -> str:
         return (
-                f'{self.name}: {len(self.plantations(Garden.PlantationSelectType.SEEDED))}/{len(self.plantations())} plant(s)'
-                '\n  - ' + '\n  - '.join([str(p) for p in self.plantations()]))
+                f'{self.name}: {len(self.plantations(Garden.PlantationSelectType.SEEDED))}/{len(self.plantations())} plant(s)' +
+                ('\n  - ' if len(self.plantations()) > 0 else '') +
+                '\n  - '.join([str(p) for p in self.plantations()]))
 
     def __add__(self, new_plant: Plantation | list[Plantation]):
         self._plantations += new_plant if isinstance(new_plant, list) else [new_plant]
@@ -60,11 +63,10 @@ class Garden(Data):
             return out_list
 
         while (len(out_list) < size) if size else True:
-            choices = [
-                'All',
-                *[p for p in plant_list if p not in out_list],
-                'Exit'
-            ]
+            choices = []
+            if not size: choices.append('All')
+            choices.extend([p for p in plant_list if p not in out_list])
+            if not size: choices.append('Exit')
 
             selected = Prompt.select(message, choices,
                                      lambda x: plantation_str(x) if isinstance(x, Plantation) else str(x)).element
@@ -120,16 +122,14 @@ class Garden(Data):
         return False
 
     def fertilizing(self) -> bool:
-        plant_str: Callable[[Plantation], str] = lambda p: (
-            f'Soil: {type(p.soil).__name__} {"(fertilized) " if any(value > 0 for value in p.soil.fertilizers.values()) else ""}| '
-            f'{"Plant: " + f"{type(p.plant).__name__} (health: {p.plant.health:.1f}%, growth: {p.plant.growth:.1f}%, fertilize quantity: {p.plant.fertilizer_quantity:.2f}/{p.plant.fertilizer_limit:.2f})" if p.plant else f"No plant"} | '
-            f'Water: {p.water_content:.2f}/{p.max_water_content:.2f} L')
-
         fertilizer = FertilizerType.select()
         print()
         plants = self.select_plantations('Which plants do you want to fertilize?',
                                          plantation_select_type=Garden.PlantationSelectType.SOILED,
-                                         plantation_str=plant_str)
+                                         plantation_str=lambda p: (
+                                             f'Soil: {type(p.soil).__name__} {"(fertilized) " if any(value > 0 for value in p.soil.fertilizers.values()) else ""}| '
+                                             f'{"Plant: " + f"{type(p.plant).__name__} (health: {p.plant.health:.1f}%, growth: {p.plant.growth:.1f}%, fertilize quantity: {p.plant.fertilizer_quantity:.2f}/{p.plant.fertilizer_limit:.2f})" if p.plant else f"No plant"} | '
+                                             f'Water: {p.water_content:.2f}/{p.max_water_content:.2f} L'))
 
         print()
         if plants:
@@ -152,3 +152,24 @@ class Garden(Data):
 
         print(f'There are no plants to maintain in the {self.name} garden.\n')
         return False
+
+    def plant_new(self) -> bool:
+        if len(self.plantations(Garden.PlantationSelectType.SOILED_NO_SEED)) == 0:
+            print(f'You have no free space to plant a new seed in the {self.name} garden.')
+            return False
+
+        plantation = self.select_plantations('Where do you want to plant your seed ?',
+                                             plantation_select_type=Garden.PlantationSelectType.SOILED_NO_SEED,
+                                             size=1)[0]
+
+        print(f'Selected: {plantation}')
+        plant_type: type(Plant) = PlantType.select()
+
+        try:
+            plantation.plant_seed(plant_type())
+        except (PlantationException.Seed, PlantationException.Soil) as ex:
+            print(f'You cannot plant your {plant_type} in this plantation.\n'
+                  f'{ex.message.capitalize()}.')
+            return False
+
+        return True

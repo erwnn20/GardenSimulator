@@ -55,6 +55,19 @@ class Game:
                 return True
         return False
 
+    def manage(self) -> bool:
+        match self.prompt.select('What do you want to do ?',
+                                 [
+                                     'Plant a new seed',
+                                     'Exit'
+                                 ], lambda x: x).element:
+            case 'Plant a new seed':
+                return game.save.garden.plant_new()
+            case 'Exit':
+                pass
+
+        return False
+
 
 game = Game()
 
@@ -76,7 +89,10 @@ if __name__ == '__main__':
                                      [
                                          'Maintain your plantations',
                                          'Manage your plantations',
+                                         'End turn',
                                          'Save and Quit',
                                      ], lambda x: x).index:
                 case 1:
                     end_turn = game.maintain()
+                case 2:
+                    end_turn = game.manage()

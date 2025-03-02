@@ -1,15 +1,19 @@
 from abc import ABC
 from dataclasses import dataclass
+from enum import Enum
 from typing import TYPE_CHECKING
 
-from pydantic import confloat
+from pydantic import confloat, conint
+
+from utils.prompt import Prompt
 
 if TYPE_CHECKING:
     from plants.plantation import Plantation
 
 
 class Plant(ABC):
-    def __init__(self, *, water_needs: float, growth_rate: confloat(gt=0, le=15), size: int, fertilizer_limit: float,
+    def __init__(self, *, water_needs: confloat(gt=0), growth_rate: confloat(gt=0, le=15), size: conint(gt=0, le=10),
+                 fertilizer_limit: confloat(gt=0, le=1.5),
                  growth: float = 0, fertilizer_quantity: float = 0):
         self.water_needs = water_needs
         self.growth_rate: float = growth_rate
@@ -64,7 +68,7 @@ class Plant(ABC):
 
         self.fertilizer_quantity = max(0.0, self.fertilizer_quantity - 0.1) + fertilizer_bonus
         damages_by_fertilizer = (2 * (
-                    self.fertilizer_limit - self.fertilizer_quantity)) if self.fertilizer_quantity > self.fertilizer_limit else 0
+                self.fertilizer_limit - self.fertilizer_quantity)) if self.fertilizer_quantity > self.fertilizer_limit else 0
 
         damages = damages_by_water + damages_by_fertilizer
         self.health -= damages
@@ -85,3 +89,27 @@ class Plant(ABC):
     def maintain(self):
         self.growth += 0.1
         self.health += 0.2
+
+
+class PlantType(Enum):
+    from plants.types.tree import TreeType
+    from plants.types.vegetable import VegetableType
+    from plants.types.herb import HerbType
+
+    TREE = TreeType
+    VEGETABLE = VegetableType
+    HERB = HerbType
+
+    def __str__(self) -> str:
+        print(f"self.name = {self.name}")          # Nom de l'Enum
+        print(f"self.value = {self.value}")        # Valeur stockée dans l'Enum (qui est un autre Enum)
+        # print(f"self.value.name = {self.value.name}")  # Nom du type imbriqué
+        return self._name_.capitalize()
+
+    @staticmethod
+    def select() -> type(Plant):
+        return Prompt.select(
+            prompt='Select a type of Plant:',
+            choices=list(PlantType),
+            display_func=lambda t: t.name,
+        ).element.value.select()

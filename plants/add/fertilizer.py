@@ -29,6 +29,7 @@ class FertilizerType(Enum):
     @staticmethod
     def select() -> 'FertilizerType':
         return Prompt.select(
-            'Choose a fertilizer:',
-            [f for f in FertilizerType],
-            lambda f: str(f)).element
+            prompt='Choose a fertilizer:',
+            choices=list(FertilizerType),
+            display_func=lambda f: str(f)
+        ).element

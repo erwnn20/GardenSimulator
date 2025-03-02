@@ -45,11 +45,11 @@ class Plantation:
 
     def plant_seed(self, new_plant: Plant) -> 'Plantation':
         if self.is_seeded:
-            raise PlantationException.Seed(f'a plant is already growing in this {type(self)} -> {repr(self.plant)}')
+            raise PlantationException.Seed(f'a plant is already growing in this {type(self).__name__} -> {self.plant}')
         if not self.is_soiled:
             raise PlantationException.Soil(f'there is no soil in which to plant the plant')
         if new_plant.size > self.size:
-            raise PlantationException.Seed(f'this {type(self)} is too small for {repr(self.plant)}')
+            raise PlantationException.Seed(f'this {type(self).__name__} is too small for {type(new_plant).__name__}')
 
         self.plant = new_plant
         return self
