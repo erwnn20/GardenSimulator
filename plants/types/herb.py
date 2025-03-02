@@ -1,6 +1,6 @@
 from enum import Enum
+from pydantic.types import confloat, conint
 
-from pydantic import confloat, conint
 from plants.plant import Plant
 from utils.prompt import Prompt
 

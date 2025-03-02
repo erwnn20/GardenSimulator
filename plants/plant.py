@@ -2,8 +2,7 @@ from abc import ABC
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
-
-from pydantic import confloat, conint
+from pydantic.types import confloat, conint
 
 from utils.prompt import Prompt
 
