@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Callable
 
 from data.save import Data
-from exceptions import PlantationException
+from exceptions import PlantationException, UserException
 from plants.add.fertilizer import FertilizerType
 from plants.plant import PlantType, Plant
 from plants.plantation import Plantation
@@ -200,30 +200,21 @@ class Garden(Data):
                           expected_type=int,
                           excluded_condition=lambda x: (not 0 < x <= 10) or not isinstance(x, int))
         cost = 10 * size
+        extra_cost = 2.5
 
-        if Prompt.get_bool(f'Price: {cost:.2f}$ - Confirm ? [y/n]:', true_values=['y', 'yes'],
-                           false_values=['n', 'no']):
-            # proceed payment
-            pass
-        else:
-            print('Transaction cancelled')
-            return False
+        if not user.buy(f'Current money: ${user.money:.2f}. This plantation', cost=cost): return False
 
         print()
         soil_type = SoilType.select()
         print()
 
         plant: Plant | None = None
-        plant_new = Prompt.get_bool(
-            prompt=f'Would you like to add a seed? It will cost you an extra $2.5 [y/n]:',
-            true_values=['yes', 'y'], false_values=['n', 'no'])
-        plant_payment_done = False
+        plant_new = user.buy('Would you like to add a seed? It', cost=extra_cost)
+        plant_payment_done = plant_new
 
         while True:
             if plant_new:
-                # proceed payment
                 plant = PlantType.select()()
-                plant_payment_done = True
 
             try:
                 plantation = Plantation(
@@ -238,25 +229,19 @@ class Garden(Data):
                 print(f'Error on plant type selection. {ex.message.title()}.\n')
                 plant = None
                 plant_new = Prompt.get_bool(
-                    prompt=f'Would you like to select another plant ? {"It will cost you an extra $2.5" if not plant_payment_done else ""}[y/n]:',
+                    prompt=f'Would you like to select another plant ? {f"It will cost you an extra ${extra_cost:.2f}" if not plant_payment_done else ""}[y/n]:',
                     true_values=['yes', 'y'], false_values=['n', 'no'])
 
             if not plant_new and plant_payment_done:
-                # refund $2.5
-                pass
+                user.refund(extra_cost)
 
     def plant_new(self, user: User) -> bool:
         if len(self.plantations(Garden.PlantationSelectType.SOILED_NO_SEED)) == 0:
             print(f'You have no free space to plant a new seed in the {self.name} garden.')
             return False
 
-        if Prompt.get_bool('Planting a new plant will cost you $5 - Confirm [y/n]:', true_values=['y', 'yes'],
-                           false_values=['n', 'no']):
-            # proceed payment
-            pass
-        else:
-            print('Transaction cancelled')
-            return False
+        cost = 5.0
+        if not user.buy(f'Current money: ${user.money:.2f}. Planting a new plant', cost=cost): return False
 
         plantation = self.select_plantations('Where do you want to plant your seed ?',
                                              plantation_select_type=Garden.PlantationSelectType.SOILED_NO_SEED,
@@ -272,7 +257,7 @@ class Garden(Data):
         except (PlantationException.Seed, PlantationException.Soil) as ex:
             print(f'You cannot plant your {plant_type} in this plantation.\n'
                   f'{ex.message.capitalize()}.')
-            # refund $5
+            user.refund(cost)
             return False
 
     def uproot(self, user: User) -> bool:
@@ -288,13 +273,7 @@ class Garden(Data):
                                              size=1)[0]
 
         cost = 5 * plantation.size
-        if Prompt.get_bool(f'Changing soil will cost you ${cost} - Confirm [y/n]:',
-                           true_values=['y', 'yes'], false_values=['n', 'no']):
-            # proceed payment
-            pass
-        else:
-            print('Transaction cancelled')
-            return False
+        if not user.buy(f'Current money: ${user.money:.2f}. Changing soil', cost=cost): return False
 
         print(f'Selected: {plantation}')
         soil_type = SoilType.select()
@@ -305,5 +284,5 @@ class Garden(Data):
             return True
         except PlantationException.Soil as ex:
             print(f'{ex.message.capitalize()}. Please remove this plant before changing the soil.')
-            # refund cost
+            user.refund(cost)
             return False
