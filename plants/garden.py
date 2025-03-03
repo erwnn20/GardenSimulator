@@ -12,9 +12,9 @@ from utils.prompt import Prompt
 
 
 class Garden(Data):
-    def __init__(self, name: str):
+    def __init__(self, name: str, *, plantations: list[Plantation] = None):
         self.name = name
-        self._plantations: list[Plantation] = []
+        self._plantations: list[Plantation] = plantations or []
 
     def __str__(self) -> str:
         return (
@@ -140,6 +140,7 @@ class Garden(Data):
             for plant in plants: plant.fertilize(fertilizer)
             print(
                 f'You have fertilized {len(plants)} plants in the {self.name} garden with {fertilizer.name.capitalize()}.')
+            return True
         else:
             print('You have not selected any plants to fertilize.')
         print()
@@ -204,12 +205,20 @@ class Garden(Data):
                     true_values=['yes', 'y'], false_values=['n', 'no'])
 
             if not plant_new and plant_payment_done:
-                # refund $2.5 to user
+                # refund $2.5
                 pass
 
-    def plant_new(self) -> bool:
+    def plant_new(self, user: User) -> bool:
         if len(self.plantations(Garden.PlantationSelectType.SOILED_NO_SEED)) == 0:
             print(f'You have no free space to plant a new seed in the {self.name} garden.')
+            return False
+
+        if Prompt.get_bool('Planting a new plant will cost you $5 - Confirm [y/n]:', true_values=['y', 'yes'],
+                           false_values=['n', 'no']):
+            # proceed payment
+            pass
+        else:
+            print('Transaction cancelled')
             return False
 
         plantation = self.select_plantations('Where do you want to plant your seed ?',
@@ -221,32 +230,43 @@ class Garden(Data):
 
         try:
             plantation.plant_seed(plant_type())
+            print(f'\nNew {plant_type.__name__} planted!')
+            return True
         except (PlantationException.Seed, PlantationException.Soil) as ex:
             print(f'You cannot plant your {plant_type} in this plantation.\n'
                   f'{ex.message.capitalize()}.')
+            # refund $5
             return False
-
-        return True
 
     def uproot(self, user: User) -> bool:
         plant = self.select_plantations('Which plants do you want to uproot?',
                                         plantation_select_type=Garden.PlantationSelectType.SEEDED,
                                         size=1)[0].dig_up()
+        print(f'A {type(plant).__name__} has been removed from the {self.name} garden')
+        return True
 
-        return False
-
-    def change_soil(self) -> bool:
+    def change_soil(self, user: User) -> bool:
         plantation = self.select_plantations('Where do you want to change the soil ?',
                                              plantation_select_type=Garden.PlantationSelectType.SOILED,
                                              size=1)[0]
+
+        cost = 5 * plantation.size
+        if Prompt.get_bool(f'Changing soil will cost you ${cost} - Confirm [y/n]:',
+                           true_values=['y', 'yes'], false_values=['n', 'no']):
+            # proceed payment
+            pass
+        else:
+            print('Transaction cancelled')
+            return False
 
         print(f'Selected: {plantation}')
         soil_type = SoilType.select()
 
         try:
             plantation.change_soil(soil_type())
+            print(f'\nSoil changed to {soil_type.__name__}.')
+            return True
         except PlantationException.Soil as ex:
             print(f'{ex.message.capitalize()}. Please remove this plant before changing the soil.')
+            # refund cost
             return False
-
-        return True

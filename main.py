@@ -1,8 +1,11 @@
 import os
+import random
 
 from data.save import Data
 from data.save import Save
 from plants.garden import Garden
+from plants.plantation import Plantation
+from plants.soil import SoilType
 from utils.prompt import Prompt
 
 clear = lambda: os.system('cls')
@@ -30,7 +33,8 @@ class Game:
                 self.save = Save(
                     name='',
                     user=None,
-                    garden=Garden(input('Enter garden name : ')),
+                    garden=Garden(input('Enter garden name : '),
+                                  plantations=[Plantation(size=5, soil=random.choice(list(SoilType)).value())]),
                 )
             case 2:
                 self.save = self._select_save()
@@ -67,11 +71,11 @@ class Game:
             case 'Buy a new plantation':
                 return game.save.garden.new_plantation(self.save.user)
             case 'Plant a new seed':
-                return game.save.garden.plant_new()
+                return game.save.garden.plant_new(self.save.user)
             case 'Uproot a plant':
                 return game.save.garden.uproot(self.save.user)
             case 'Change soil':
-                return game.save.garden.change_soil()
+                return game.save.garden.change_soil(self.save.user)
             case 'Exit':
                 pass
 
