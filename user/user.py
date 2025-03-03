@@ -12,7 +12,7 @@ class User(Data):
         self.products: dict[Product, int] = products or {}
 
     def __str__(self):
-        return f'{self.name} (${self.money:.2f}) - {len(self.products)} products'
+        return f'{self.name} (${self.money:.2f}) - {sum(self.products.values())} products'
 
     def __add__(self, money: float) -> 'User':
         self.money += money

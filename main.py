@@ -6,6 +6,7 @@ from data.save import Save
 from plants.garden import Garden
 from plants.plantation import Plantation
 from plants.soil import SoilType
+from product.product import Product
 from user.user import User
 from utils.prompt import Prompt
 
@@ -65,6 +66,32 @@ class Game:
 
     def user(self):
         print(self.save.user)
+
+    def market(self) -> bool:
+        sell = False
+
+        saleable_items = [product for product, quantity in self.save.user.products.items() if quantity > 0]
+
+        if not saleable_items: return False
+
+        while True:
+            selected_item = Prompt.select('What do you want to sell?',
+                                          [*saleable_items, 'Exit'],
+                                          lambda x: f'{x}{f" - quantity: {self.save.user.products[x]}" if isinstance(x, Product) else ""}'
+                                          ).element
+            match selected_item:
+                case 'Exit':
+                    return sell
+                case _:
+                    number_of_items = Prompt.get('How many do you want to sell?',
+                               expected_type=int,
+                               excluded_condition=lambda x: not 0 <= x <= self.save.user.products[selected_item])
+                    if 0 < number_of_items <= self.save.user.products[selected_item]:
+                        money: float = selected_item.value.price * number_of_items
+                        self.save.user + money
+                        self.save.user.products[selected_item] -= number_of_items
+                        print(f'You sold {number_of_items} item(s) of {selected_item} for ${money:.2f}.\n')
+
 
 
 game = Game()
