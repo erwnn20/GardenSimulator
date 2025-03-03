@@ -42,7 +42,7 @@ class Garden(Data):
             Garden.PlantationSelectType.SEEDED: plantation.is_seeded,
         }[plantation_select_type]]
 
-    def str(self) -> str:
+    def to_str(self) -> str:
         avg_health = 0.0 if len(self.plantations(Garden.PlantationSelectType.SEEDED)) == 0 else sum(
             [p1.plant.health for p1 in self.plantations(Garden.PlantationSelectType.SEEDED)]) / len(
             self.plantations(Garden.PlantationSelectType.SEEDED))
@@ -103,6 +103,8 @@ class Garden(Data):
     def collect(self, user: User) -> bool:
         plantations = self.select_plantations('Which plantations do you want to collect?',
                                               plantation_select_type=Garden.PlantationSelectType.SEEDED)
+        if not plantations: return False
+
         for plantation in plantations:
             if user.collect(plantation.plant):
                 print(f'You have collected {plantation.plant.emojis}{type(plantation.plant).__name__} products.')
@@ -302,3 +304,7 @@ class Garden(Data):
             print(f'{ex.message.capitalize()}. Please remove this plant before changing the soil.')
             user.refund(cost)
             return False
+
+    def end_turn(self):
+        for plantation in self.plantations():
+            plantation.end_turn()

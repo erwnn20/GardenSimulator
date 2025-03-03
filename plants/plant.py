@@ -91,7 +91,7 @@ class Plant(ABC):
                              else growth_total * 0.35 if self.growth >= 120 else 120 - self.growth)
         growth_total -= damages_by_growth
 
-        damages_by_water = soil_humidity.status.value * 2 if soil_humidity.ultra_status else 1
+        damages_by_water = soil_humidity.status.value * (2 if soil_humidity.ultra_status else 1)
 
         self.fertilizer_quantity = max(0.0, self.fertilizer_quantity - 0.1) + fertilizer_bonus
         damages_by_fertilizer = (2 * (
@@ -120,7 +120,7 @@ class Plant(ABC):
             raise PlantException.Dead(self)
 
         self.growth = min(120.0, self.growth + 5)
-        self.health += min(100.0, self.growth + 10)
+        self.health = min(100.0, self.health + 10)
 
     def collect(self) -> int:
         if not self.is_alive:

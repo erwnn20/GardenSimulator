@@ -34,7 +34,7 @@ class Game:
             case 1:
                 self.save = Save(
                     name='',
-                    user=User(name=Prompt.get('Enter your name : ', expected_type=str), money=12.5),
+                    user=User(name=Prompt.get('Enter your name : ', expected_type=str), money=120.5),
                     garden=Garden(
                         Prompt.get('Enter garden name : ', expected_type=str),
                         plantations=[Plantation(size=5, soil=random.choice(list(SoilType)).value(), water_content=10)]
@@ -50,7 +50,7 @@ class Game:
 
         match Prompt.select('Select an action',
                             [
-                                'Collect plantations products'
+                                'Collect plantations products',
                                 'Maintain your plantations',
                                 'Manage your plantations',
                                 'Exit',
@@ -64,34 +64,47 @@ class Game:
             case _:
                 return False
 
-    def user(self):
-        print(self.save.user)
+    def details(self):
+        print('User:', self.save.user.details())
+        print('\nGarden:', self.save.garden)
 
     def market(self) -> bool:
         sell = False
 
         saleable_items = [product for product, quantity in self.save.user.products.items() if quantity > 0]
 
-        if not saleable_items: return False
+        if not saleable_items:
+            print('You have no products to sell')
+            return False
 
         while True:
             selected_item = Prompt.select('What do you want to sell?',
                                           [*saleable_items, 'Exit'],
-                                          lambda x: f'{x}{f" - quantity: {self.save.user.products[x]}" if isinstance(x, Product) else ""}'
+                                          lambda
+                                              x: f'{x}{f" - quantity: {self.save.user.products[x]}" if isinstance(x, Product) else ""}'
                                           ).element
             match selected_item:
                 case 'Exit':
                     return sell
                 case _:
                     number_of_items = Prompt.get('How many do you want to sell?',
-                               expected_type=int,
-                               excluded_condition=lambda x: not 0 <= x <= self.save.user.products[selected_item])
+                                                 expected_type=int,
+                                                 excluded_condition=lambda x: not 0 <= x <= self.save.user.products[
+                                                     selected_item])
                     if 0 < number_of_items <= self.save.user.products[selected_item]:
                         money: float = selected_item.value.price * number_of_items
                         self.save.user + money
                         self.save.user.products[selected_item] -= number_of_items
                         print(f'You sold {number_of_items} item(s) of {selected_item} for ${money:.2f}.\n')
 
+    def end_turn(self):
+        self.save.garden.end_turn()
+        Product.end_turn()
+
+    @staticmethod
+    def next():
+        input('\nPress ENTER to continue ')
+        clear()
 
 
 game = Game()
@@ -99,14 +112,15 @@ game = Game()
 if __name__ == '__main__':
     clear()
     print('Welcome to Garden Simulator')
-    input('Press ENTER to continue')
+    game.next()
     clear()
 
     game.select_save()
     while True:
+        clear()
         actions = 3
         while actions > 0:
-            clear()
+            print(f'Remaining actions: {actions}')
             match Prompt.select('Where do you want to go ?',
                                 [
                                     'My details',
@@ -115,10 +129,21 @@ if __name__ == '__main__':
                                     'End turn',
                                 ], lambda x: x).index:
                 case 1:
-                    game.user()
+                    clear()
+                    game.details()
+                    game.next()
                 case 2:
+                    clear()
                     actions -= 1 if game.garden() else 0
+                    game.next()
                 case 3:
+                    clear()
                     actions -= 1 if game.market() else 0
+                    game.next()
                 case 4:
+                    clear()
                     actions = 0
+
+        game.end_turn()
+
+        game.next()

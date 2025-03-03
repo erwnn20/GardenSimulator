@@ -12,7 +12,7 @@ class User(Data):
         self.products: dict[Product, int] = products or {}
 
     def __str__(self):
-        return f'{self.name} (${self.money:.2f}) - {sum(self.products.values())} products'
+        return f'{self.name} (${self.money:.2f}) - {sum(self.products.values())} product(s)'
 
     def __add__(self, money: float) -> 'User':
         self.money += money
@@ -25,8 +25,13 @@ class User(Data):
         self.money -= money
         return self
 
-    def str(self) -> str:
+    def to_str(self) -> str:
         return f'{self.name} (${self.money:.2f})'
+
+    def details(self) -> str:
+        return (f'{self}:' +
+                ('\n  - ' if sum(self.products.values()) > 0 else '') +
+                '\n  - '.join([f'{product}{f" - quantity: {quantity}" if quantity > 0 else ""}' for product, quantity in self.products.items()]))
 
     def buy(self, prompt: str = 'This', *, cost: float) -> bool:
         if Prompt.get_bool(f'{prompt} will cost you ${cost:.2f} - Confirm ? [y/n]:',
@@ -53,5 +58,5 @@ class User(Data):
             self.products[plant.product] += plant.collect()
             return True
         except (PlantException.Dead, PlantException.Growth) as e:
-            print(f'{self.name} cannot collect {plant.product} form {plant.emojis}{type(plant).__name__}. {e.message}')
+            print(f'{self.name} cannot collect {plant.product.name} form {plant.emojis}{type(plant).__name__}. {e.message}')
             return False

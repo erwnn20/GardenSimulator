@@ -1,3 +1,4 @@
+import random
 from dataclasses import dataclass
 from enum import Enum
 
@@ -31,4 +32,10 @@ class Product(Enum):
     CUCUMBER = ProductValues(emoji='🥒', price=2.75)
 
     def __str__(self):
-        return f'{self.value.emoji} {self.name.capitalize()} ({self.value.price})'
+        return f'{self.value.emoji} {self.name.capitalize()} (${self.value.price:.2f})'
+
+    @classmethod
+    def end_turn(cls):
+        for product in cls:
+            product.value.price *= random.uniform(0.9, 1.1)
+        print('Prices of products on the market have evolved')

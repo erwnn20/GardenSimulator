@@ -17,7 +17,7 @@ class Save:
     def __str__(self) -> str:
         return (f'{self.name}'
                 '\n' + '\n'.join(
-            [f'  {key.capitalize()}: {value.str()}' for key, value in vars(self).items()
+            [f'  {key.capitalize()}: {value.to_str()}' for key, value in vars(self).items()
              if isinstance(value, Data)]))
 
 
@@ -25,7 +25,7 @@ class Data(ABC):
     _dir: str = '/data/saves/'
 
     @abstractmethod
-    def str(self) -> str:
+    def to_str(self) -> str:
         pass
 
     @staticmethod

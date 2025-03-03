@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from exceptions import PlantationException
+from exceptions import PlantationException, PlantException
 from plants.add.fertilizer import FertilizerType
 from plants.plant import Plant
 from plants.soil import Soil
@@ -125,3 +125,20 @@ class Plantation:
             raise PlantationException.Soil('no soil to fertilize')
         self.soil.fertilize(fertiliser)
         return self
+
+    def end_turn(self):
+        if self.plant is not None:
+            try:
+                report = self.plant.grow(self)
+                print(f'{self.plant}\n'
+                      f'  - grew by {report.growth.total:.1f}%: {report.growth.by_water:.1f}% thanks to hydration multiply soil and fertilizers by {report.growth.soil_multiplier:.2f}\n' +
+                      (f'  - took {report.damages.total:.2f}% damage. '
+                       f'{f"{report.damages.by_growth:.2f}% because the plant is too big. " if report.damages.by_growth > 0 else ""}'
+                       f'{f"{report.damages.by_soil:.2f}% because the soil was too {report.damages.soil_humidity_status.name.lower()}. " if report.damages.by_soil > 0 else ""}'
+                       f'{f"{report.damages.by_fertilizer:.2f}% because the amount of fertilizer is too high. " if report.damages.by_fertilizer > 0 else ""}')
+                       if report.damages.total > 0 else '')
+                self.water_content -= report.water_consumption
+            except PlantException.Dead as e:
+                print(e.message)
+        else:
+            self.water_content = max(0.0, self.water_content - self.max_water_content * 0.05)
