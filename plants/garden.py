@@ -83,6 +83,23 @@ class Garden(Data):
 
         return out_list
 
+    def maintain(self) -> bool:
+        match Prompt.select('What do you want to do ?',
+                            [
+                                'Watering',
+                                'Fertilizing',
+                                'Pruning/Maintenance',
+                                'Exit'
+                            ], lambda x: x).element:
+            case 'Watering':
+                return self.watering()
+            case 'Fertilizing':
+                return self.fertilizing()
+            case 'Pruning/Maintenance':
+                return self.maintain_plant()
+            case _:
+                return False
+
     def watering(self) -> bool:
         plant_str: Callable[[Plantation], str] = lambda p: (f'Soil: {type(p.soil).__name__} | '
                                                             f'{"Plant: " + f"{type(p.plant).__name__} (health: {p.plant.health:.1f}%, growth: {p.plant.growth:.1f}%, water needs: {p.plant.water_needs:.2f} L)" if p.plant else f"No plant"} | '
@@ -147,7 +164,7 @@ class Garden(Data):
 
         return False
 
-    def maintain(self) -> bool:
+    def maintain_plant(self) -> bool:
         if self.plantations(Garden.PlantationSelectType.SEEDED):
             for plantation in self.plantations(Garden.PlantationSelectType.SEEDED): plantation.plant.maintain()
 
@@ -157,6 +174,26 @@ class Garden(Data):
 
         print(f'There are no plants to maintain in the {self.name} garden.\n')
         return False
+
+    def manage(self, user: User) -> bool:
+        match Prompt.select('What do you want to do ?',
+                            [
+                                'Buy a new plantation',
+                                'Plant a new seed',
+                                'Uproot a plant',
+                                'Change soil',
+                                'Exit'
+                            ], lambda x: x).element:
+            case 'Buy a new plantation':
+                return self.new_plantation(user)
+            case 'Plant a new seed':
+                return self.plant_new(user)
+            case 'Uproot a plant':
+                return self.uproot(user)
+            case 'Change soil':
+                return self.change_soil(user)
+            case _:
+                return False
 
     def new_plantation(self, user: User) -> bool:
         size = Prompt.get('Select the size of the plantation (between 1 and 10):',

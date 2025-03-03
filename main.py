@@ -23,8 +23,9 @@ class Game:
         return self.saves.get(
             list(self.saves.keys())[self.prompt.select(
                 prompt='Select save :',
-                choices=self.saves,
-                display_func=lambda _save: str(self.saves[_save])).index - 1])
+                choices=[str(save) for save in list(self.saves.values())],
+                display_func=lambda s: s
+            ).index - 1])
 
     def select_save(self):
         match self.prompt.select('What do you want to do ?', ['New game', 'Load a save'], lambda x: x) if len(
@@ -40,46 +41,6 @@ class Game:
                 self.save = self._select_save()
             case _:
                 raise IndexError('Invalid game start option selection')
-
-    def maintain(self) -> bool:
-        match self.prompt.select('What do you want to do ?',
-                                 [
-                                     'Watering',
-                                     'Fertilizing',
-                                     'Pruning/Maintenance',
-                                     'Exit'
-                                 ], lambda x: x).element:
-            case 'Watering':
-                return game.save.garden.watering()
-            case 'Fertilizing':
-                return game.save.garden.fertilizing()
-            case 'Pruning/Maintenance':
-                return game.save.garden.maintain()
-            case 'Exit':
-                pass
-        return False
-
-    def manage(self) -> bool:
-        match self.prompt.select('What do you want to do ?',
-                                 [
-                                     'Buy a new plantation',
-                                     'Plant a new seed',
-                                     'Uproot a plant',
-                                     'Change soil',
-                                     'Exit'
-                                 ], lambda x: x).element:
-            case 'Buy a new plantation':
-                return game.save.garden.new_plantation(self.save.user)
-            case 'Plant a new seed':
-                return game.save.garden.plant_new(self.save.user)
-            case 'Uproot a plant':
-                return game.save.garden.uproot(self.save.user)
-            case 'Change soil':
-                return game.save.garden.change_soil(self.save.user)
-            case 'Exit':
-                pass
-
-        return False
 
 
 game = Game()
@@ -106,6 +67,6 @@ if __name__ == '__main__':
                                          'Save and Quit',
                                      ], lambda x: x).index:
                 case 1:
-                    actions -= 1 if game.maintain() else 0
+                    actions -= 1 if game.save.garden.maintain() else 0
                 case 2:
-                    actions -= 1 if game.manage() else 0
+                    actions -= 1 if game.save.garden.manage(game.save.user) else 0
