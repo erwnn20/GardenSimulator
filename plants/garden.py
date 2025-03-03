@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Callable
 
 from data.save import Data
-from exceptions import PlantationException, UserException
+from exceptions import PlantationException, UserException, PlantException
 from plants.add.fertilizer import FertilizerType
 from plants.plant import PlantType, Plant
 from plants.plantation import Plantation
@@ -101,72 +101,76 @@ class Garden(Data):
                 return False
 
     def watering(self) -> bool:
-        plant_str: Callable[[Plantation], str] = lambda p: (f'Soil: {type(p.soil).__name__} | '
-                                                            f'{"Plant: " + f"{type(p.plant).__name__} (health: {p.plant.health:.1f}%, growth: {p.plant.growth:.1f}%, water needs: {p.plant.water_needs:.2f} L)" if p.plant else f"No plant"} | '
-                                                            f'Water: {p.water_content:.2f}/{p.max_water_content:.2f} L')
+        plantation_str: Callable[[Plantation], str] = lambda p: (f'Soil: {type(p.soil).__name__} | '
+                                                                 f'{"Plant: " + f"{p.plant.emojis}{type(p.plant).__name__} (health: {p.plant.health:.1f}%, growth: {p.plant.growth:.1f}%, water needs: {p.plant.water_needs:.2f} L)" if p.plant else f"No plantation"} | '
+                                                                 f'Water: {p.water_content:.2f}/{p.max_water_content:.2f} L')
 
-        plants = self.select_plantations('Which plants do you want to water?',
-                                         plantation_select_type=Garden.PlantationSelectType.SOILED,
-                                         plantation_str=plant_str)
+        plantations = self.select_plantations('Which plantations do you want to water?',
+                                              plantation_select_type=Garden.PlantationSelectType.SOILED,
+                                              plantation_str=plantation_str)
 
         print()
-        if plants:
+        if plantations:
             print((f'Selected:\n'
-                   '  - ' + '\n  - '.join([plant_str(p) for p in plants])))
-            all_plants = Prompt.select('You want to :',
-                                       [
-                                           'water all plantations equally',
-                                           'choose the quantity of water for each plantation'
-                                       ], lambda x: x).index == 1
+                   '  - ' + '\n  - '.join([plantation_str(p) for p in plantations])))
+            all_plantations = Prompt.select('You want to :',
+                                            [
+                                                'water all plantations equally',
+                                                'choose the quantity of water for each plantation'
+                                            ], lambda x: x).index == 1
 
             water: float | None = None
-            if all_plants:
+            if all_plantations:
                 water = Prompt.get(
-                    prompt='Enter the amount of water you want to use per plant :',
+                    prompt='Enter the amount of water you want to use per plantation :',
                     expected_type=float,
                     excluded_condition=lambda x: x < 0.0
                 )
 
-            for plant in plants:
-                if not all_plants: print()
-                plant.watering_up(water if all_plants else Prompt.get(
-                    prompt=f'{type(plant).__name__}: {plant_str(plant)}\n'
-                           'Enter the amount of water you want to use for this plant:',
+            for plantation in plantations:
+                if not all_plantations: print()
+                plantation.watering_up(water if all_plantations else Prompt.get(
+                    prompt=f'{type(plantation).__name__}: {plantation_str(plantation)}\n'
+                           'Enter the amount of water you want to use for this plantation:',
                     expected_type=float,
                     excluded_condition=lambda x: x < 0.0
                 ))
 
-            print(f"\nYou've watered {len(plants)} plants in the {self.name} garden.\n")
+            print(f"\nYou've watered {len(plantations)} plantations in the {self.name} garden.\n")
             return True
 
-        print('You have not selected any plants to water.\n')
+        print('You have not selected any plantations to water.\n')
         return False
 
     def fertilizing(self) -> bool:
         fertilizer = FertilizerType.select()
         print()
-        plants = self.select_plantations('Which plants do you want to fertilize?',
-                                         plantation_select_type=Garden.PlantationSelectType.SOILED,
-                                         plantation_str=lambda p: (
-                                             f'Soil: {type(p.soil).__name__} {"(fertilized) " if any(value > 0 for value in p.soil.fertilizers.values()) else ""}| '
-                                             f'{"Plant: " + f"{type(p.plant).__name__} (health: {p.plant.health:.1f}%, growth: {p.plant.growth:.1f}%, fertilize quantity: {p.plant.fertilizer_quantity:.2f}/{p.plant.fertilizer_limit:.2f})" if p.plant else f"No plant"} | '
-                                             f'Water: {p.water_content:.2f}/{p.max_water_content:.2f} L'))
+        plantations = self.select_plantations('Which plantations do you want to fertilize?',
+                                              plantation_select_type=Garden.PlantationSelectType.SOILED,
+                                              plantation_str=lambda p: (
+                                                  f'Soil: {type(p.soil).__name__} {"(fertilized) " if any(value > 0 for value in p.soil.fertilizers.values()) else ""}| '
+                                                  f'{"Plant: " + f"{p.plant.emojis}{type(p.plant).__name__} (health: {p.plant.health:.1f}%, growth: {p.plant.growth:.1f}%, fertilize quantity: {p.plant.fertilizer_quantity:.2f}/{p.plant.fertilizer_limit:.2f})" if p.plant else f"No plantation"} | '
+                                                  f'Water: {p.water_content:.2f}/{p.max_water_content:.2f} L'))
 
         print()
-        if plants:
-            for plant in plants: plant.fertilize(fertilizer)
+        if plantations:
+            for plantation in plantations: plantation.fertilize(fertilizer)
             print(
-                f'You have fertilized {len(plants)} plants in the {self.name} garden with {fertilizer.name.capitalize()}.')
+                f'You have fertilized {len(plantations)} plantations in the {self.name} garden with {fertilizer.name.capitalize()}.')
             return True
         else:
-            print('You have not selected any plants to fertilize.')
+            print('You have not selected any plantations to fertilize.')
         print()
 
         return False
 
     def maintain_plant(self) -> bool:
         if self.plantations(Garden.PlantationSelectType.SEEDED):
-            for plantation in self.plantations(Garden.PlantationSelectType.SEEDED): plantation.plant.maintain()
+            for plantation in self.plantations(Garden.PlantationSelectType.SEEDED):
+                try:
+                    plantation.plant.maintain()
+                except PlantException.Dead:
+                    pass
 
             print(
                 f"You've tended the {len(self.plantations(Garden.PlantationSelectType.SEEDED))} plants of the {self.name} garden.\n")

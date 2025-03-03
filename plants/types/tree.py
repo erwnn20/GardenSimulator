@@ -14,28 +14,33 @@ class Tree(Plant):
 
 
 class Oak(Tree):
-    def __init__(self):
-        super().__init__(water_needs=6.0, growth_rate=1.2, size=10, fertilizer_limit=1.2)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=6.0, growth_rate=1.2, size=10, fertilizer_limit=1.2,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Pine(Tree):
-    def __init__(self):
-        super().__init__(water_needs=5.5, growth_rate=1.8, size=9, fertilizer_limit=1.125)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=5.5, growth_rate=1.8, size=9, fertilizer_limit=1.125,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Maple(Tree):
-    def __init__(self):
-        super().__init__(water_needs=7.0, growth_rate=2.5, size=8, fertilizer_limit=1.35)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=7.0, growth_rate=2.5, size=8, fertilizer_limit=1.35,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Willow(Tree):
-    def __init__(self):
-        super().__init__(water_needs=8.5, growth_rate=3.5, size=10, fertilizer_limit=1.425)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=8.5, growth_rate=3.5, size=10, fertilizer_limit=1.425,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class AppleTree(Tree):
-    def __init__(self):
-        super().__init__(water_needs=6.5, growth_rate=2.0, size=7, fertilizer_limit=1.275)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=6.5, growth_rate=2.0, size=7, fertilizer_limit=1.275,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class TreeType(Enum):
@@ -47,7 +52,7 @@ class TreeType(Enum):
 
     def __str__(self):
         tree_instance = self.value()
-        return (f'{self.name.capitalize()} '
+        return (f'{tree_instance.emojis}{self.name.capitalize()} '
                 f'(size: {tree_instance.size}, '
                 f'water needs: {tree_instance.water_needs:.1f} L, '
                 f'growth rate: {tree_instance.growth_rate:.1f}%)')

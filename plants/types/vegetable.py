@@ -13,33 +13,39 @@ class Vegetable(Plant):
 
 
 class Carrot(Vegetable):
-    def __init__(self):
-        super().__init__(water_needs=2.0, growth_rate=10, size=2, fertilizer_limit=1.2)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=2.0, growth_rate=10, size=2, fertilizer_limit=1.2,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Tomato(Vegetable):
-    def __init__(self):
-        super().__init__(water_needs=2.5, growth_rate=12, size=4, fertilizer_limit=1.5)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=2.5, growth_rate=12, size=4, fertilizer_limit=1.5,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Lettuce(Vegetable):
-    def __init__(self):
-        super().__init__(water_needs=1.8, growth_rate=9, size=3, fertilizer_limit=1.0)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=1.8, growth_rate=9, size=3, fertilizer_limit=1.0,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Potato(Vegetable):
-    def __init__(self):
-        super().__init__(water_needs=2.2, growth_rate=8, size=3, fertilizer_limit=1.3)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=2.2, growth_rate=8, size=3, fertilizer_limit=1.3,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Pepper(Vegetable):
-    def __init__(self):
-        super().__init__(water_needs=2.8, growth_rate=13, size=5, fertilizer_limit=1.4)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=2.8, growth_rate=13, size=5, fertilizer_limit=1.4,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Cucumber(Vegetable):
-    def __init__(self):
-        super().__init__(water_needs=3.0, growth_rate=14, size=6, fertilizer_limit=1.5)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=3.0, growth_rate=14, size=6, fertilizer_limit=1.5,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class VegetableType(Enum):
@@ -52,7 +58,7 @@ class VegetableType(Enum):
 
     def __str__(self):
         vegetable_instance = self.value()
-        return (f'{self.name.capitalize()} '
+        return (f'{vegetable_instance.emojis}{self.name.capitalize()} '
                 f'(size: {vegetable_instance.size}, '
                 f'water needs: {vegetable_instance.water_needs:.1f} L, '
                 f'growth rate: {vegetable_instance.growth_rate:.1f}%)')

@@ -14,33 +14,40 @@ class Herb(Plant):
 
 
 class Basil(Herb):
-    def __init__(self):
-        super().__init__(water_needs=1.5, growth_rate=10, size=2, fertilizer_limit=0.6)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=1.5, growth_rate=10, size=2, fertilizer_limit=0.6,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Mint(Herb):
-    def __init__(self):
-        super().__init__(water_needs=2.0, growth_rate=12, size=3, fertilizer_limit=0.8)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=2.0, growth_rate=12, size=3, fertilizer_limit=0.8,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Parsley(Herb):
-    def __init__(self):
-        super().__init__(water_needs=1.2, growth_rate=9, size=2, fertilizer_limit=0.7)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=1.2, growth_rate=9, size=2, fertilizer_limit=0.7,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Chives(Herb):
-    def __init__(self):
-        super().__init__(water_needs=1.0, growth_rate=9, size=1, fertilizer_limit=0.5)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=1.0, growth_rate=9, size=1, fertilizer_limit=0.5,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Rosemary(Herb):
-    def __init__(self):
-        super().__init__(water_needs=0.8, growth_rate=6, size=3, fertilizer_limit=0.4)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=0.8, growth_rate=6, size=3, fertilizer_limit=0.4,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
 
 
 class Thyme(Herb):
-    def __init__(self):
-        super().__init__(water_needs=0.5, growth_rate=8, size=2, fertilizer_limit=0.3)
+    def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(water_needs=0.5, growth_rate=8, size=2, fertilizer_limit=0.3,
+                         growth=growth, fertilizer_quantity=fertilizer_quantity)
+
 
 class HerbType(Enum):
     BASIL = Basil
@@ -52,7 +59,7 @@ class HerbType(Enum):
 
     def __str__(self):
         herb_instance = self.value()
-        return (f'{self.name.capitalize()} '
+        return (f'{herb_instance.emojis}{self.name.capitalize()} '
                 f'(size: {herb_instance.size}, '
                 f'water needs: {herb_instance.water_needs:.1f} L, '
                 f'growth rate: {herb_instance.growth_rate:.1f}%)')
