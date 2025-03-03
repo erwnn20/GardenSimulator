@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Callable
 
 from data.save import Data
-from exceptions import PlantationException, UserException, PlantException
+from exceptions import PlantationException, PlantException
 from plants.add.fertilizer import FertilizerType
 from plants.plant import PlantType, Plant
 from plants.plantation import Plantation
@@ -99,6 +99,15 @@ class Garden(Data):
                 return self.maintain_plant()
             case _:
                 return False
+
+    def collect(self, user: User) -> bool:
+        plantations = self.select_plantations('Which plantations do you want to collect?',
+                                              plantation_select_type=Garden.PlantationSelectType.SEEDED)
+        for plantation in plantations:
+            if user.collect(plantation.plant):
+                print(f'You have collected {plantation.plant.emojis}{type(plantation.plant).__name__} products.')
+
+        return True
 
     def watering(self) -> bool:
         plantation_str: Callable[[Plantation], str] = lambda p: (f'Soil: {type(p.soil).__name__} | '
@@ -269,6 +278,9 @@ class Garden(Data):
                                         plantation_select_type=Garden.PlantationSelectType.SEEDED,
                                         size=1)[0].dig_up()
         print(f'A {type(plant).__name__} has been removed from the {self.name} garden')
+
+        if user.collect(plant):
+            print(f'You have collected {plant} products.')
         return True
 
     def change_soil(self, user: User) -> bool:

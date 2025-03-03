@@ -49,13 +49,16 @@ class Game:
 
         match Prompt.select('Select an action',
                             [
+                                'Collect plantations products'
                                 'Maintain your plantations',
                                 'Manage your plantations',
                                 'Exit',
                             ], lambda x: x).index:
             case 1:
-                return game.save.garden.maintain()
+                return game.save.garden.collect(game.save.user)
             case 2:
+                return game.save.garden.maintain()
+            case 3:
                 return game.save.garden.manage(game.save.user)
             case _:
                 return False

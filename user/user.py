@@ -1,5 +1,6 @@
 from data.save import Data
-from exceptions import UserException
+from exceptions import UserException, PlantException
+from plants.plant import Plant
 from product.product import Product
 from utils.prompt import Prompt
 
@@ -43,3 +44,14 @@ class User(Data):
     def refund(self, money: float) -> 'User':
         self + money
         return self
+
+    def collect(self, plant: Plant) -> bool:
+        try:
+            if plant.product not in self.products:
+                self.products[plant.product] = 0
+
+            self.products[plant.product] += plant.collect()
+            return True
+        except (PlantException.Dead, PlantException.Growth) as e:
+            print(f'{self.name} cannot collect {plant.product} form {plant.emojis}{type(plant).__name__}. {e.message}')
+            return False

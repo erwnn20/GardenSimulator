@@ -16,12 +16,14 @@ if TYPE_CHECKING:
 class Plant(ABC):
     def __init__(self, *,
                  emoji: str = '🌱',
+                 product: Product = Product.PRODUCT,
                  water_needs: confloat(gt=0),
                  growth_rate: confloat(gt=0, le=15),
                  size: conint(gt=0, le=10),
                  fertilizer_limit: confloat(gt=0, le=1.5),
                  growth: float = 0, fertilizer_quantity: float = 0):
         self.emoji = emoji
+        self.product = product
         self.water_needs: float = water_needs
         self.growth_rate: float = growth_rate
         self.growth = growth
