@@ -1,3 +1,4 @@
+import os
 import pickle
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -22,21 +23,27 @@ class Save:
 
 
 class Data(ABC):
-    _dir: str = '/data/saves/'
+    _dir: str = './data/saves/'
 
     @abstractmethod
     def to_str(self) -> str:
         pass
 
     @staticmethod
-    def save(filename: str, data: dict[str, Save]) -> None:
-        with open(f'{Data._dir}{filename}', 'wb') as file:
+    def save(filename: str, data: dict[str, Save]) -> str:
+        filepath = os.path.join(Data._dir, filename)
+        os.makedirs(Data._dir, exist_ok=True)
+
+        with open(filepath, 'wb') as file:
             pickle.dump(data, file)
+        return filepath
 
     @staticmethod
     def load(filename: str) -> dict[str, Save]:
+        filepath = os.path.join(Data._dir, filename)
+
         try:
-            with open(f'{Data._dir}{filename}', 'rb') as file:
+            with open(filepath, 'rb') as file:
                 return pickle.load(file)
         except FileNotFoundError:
             return {}

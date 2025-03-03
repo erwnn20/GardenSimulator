@@ -18,7 +18,7 @@ class Game:
     saves: dict[str, Save] = Data.load(saves_filename)
 
     def __init__(self):
-        self.save: Save | None = None
+        self._save: Save | None = None
 
     def _select_save(self) -> Save:
         return self.saves.get(
@@ -29,24 +29,25 @@ class Game:
             ).index - 1])
 
     def select_save(self):
-        match Prompt.select('What do you want to do ?', ['New game', 'Load a save'], lambda x: x) if len(
-            self.saves) > 0 else 1:
+        index = Prompt.select('What do you want to do ?', ['New game', 'Load a save'], lambda x: x).index if len(
+            self.saves) > 0 else 1
+        match index:
             case 1:
-                self.save = Save(
+                self._save = Save(
                     name='',
-                    user=User(name=Prompt.get('Enter your name : ', expected_type=str), money=120.5),
+                    user=User(name=Prompt.get('Enter your name : ', expected_type=str), money=12.5),
                     garden=Garden(
                         Prompt.get('Enter garden name : ', expected_type=str),
                         plantations=[Plantation(size=5, soil=random.choice(list(SoilType)).value(), water_content=10)]
                     ),
                 )
             case 2:
-                self.save = self._select_save()
+                self._save = self._select_save()
             case _:
-                raise IndexError('Invalid game start option selection')
+                raise IndexError(f'Invalid game start option selection: {index}')
 
     def garden(self) -> bool:
-        print(f'Your garden: {self.save.garden}\n')
+        print(f'Your garden: {self._save.garden}\n')
 
         match Prompt.select('Select an action',
                             [
@@ -56,22 +57,22 @@ class Game:
                                 'Exit',
                             ], lambda x: x).index:
             case 1:
-                return game.save.garden.collect(game.save.user)
+                return game._save.garden.collect(game._save.user)
             case 2:
-                return game.save.garden.maintain()
+                return game._save.garden.maintain()
             case 3:
-                return game.save.garden.manage(game.save.user)
+                return game._save.garden.manage(game._save.user)
             case _:
                 return False
 
     def details(self):
-        print('User:', self.save.user.details())
-        print('\nGarden:', self.save.garden)
+        print('User:', self._save.user.details())
+        print('\nGarden:', self._save.garden)
 
     def market(self) -> bool:
         sell = False
 
-        saleable_items = [product for product, quantity in self.save.user.products.items() if quantity > 0]
+        saleable_items = [product for product, quantity in self._save.user.products.items() if quantity > 0]
 
         if not saleable_items:
             print('You have no products to sell')
@@ -81,7 +82,7 @@ class Game:
             selected_item = Prompt.select('What do you want to sell?',
                                           [*saleable_items, 'Exit'],
                                           lambda
-                                              x: f'{x}{f" - quantity: {self.save.user.products[x]}" if isinstance(x, Product) else ""}'
+                                              x: f'{x}{f" - quantity: {self._save.user.products[x]}" if isinstance(x, Product) else ""}'
                                           ).element
             match selected_item:
                 case 'Exit':
@@ -89,22 +90,36 @@ class Game:
                 case _:
                     number_of_items = Prompt.get('How many do you want to sell?',
                                                  expected_type=int,
-                                                 excluded_condition=lambda x: not 0 <= x <= self.save.user.products[
+                                                 excluded_condition=lambda x: not 0 <= x <= self._save.user.products[
                                                      selected_item])
-                    if 0 < number_of_items <= self.save.user.products[selected_item]:
+                    if 0 < number_of_items <= self._save.user.products[selected_item]:
                         money: float = selected_item.value.price * number_of_items
-                        self.save.user + money
-                        self.save.user.products[selected_item] -= number_of_items
+                        self._save.user + money
+                        self._save.user.products[selected_item] -= number_of_items
                         print(f'You sold {number_of_items} item(s) of {selected_item} for ${money:.2f}.\n')
 
     def end_turn(self):
-        self.save.garden.end_turn()
+        self._save.garden.end_turn()
         Product.end_turn()
 
     @staticmethod
     def next():
         input('\nPress ENTER to continue ')
         clear()
+
+    def save(self):
+        if self._save.name == '' or Prompt.get_bool(
+                f'Current save name: {self._save.name}. Do you want to change it? [y/n]:',
+                true_values=['y', 'yes'], false_values=['n', 'no']):
+            save_name = Prompt.get('Enter save name: ', expected_type=str)
+
+            if save_name not in self.saves or Prompt.get_bool(
+                f'The {save_name} backup already exists: {self.saves[save_name]}. Do you want to overwrite it?',
+                true_values=['y', 'yes'], false_values=['n', 'no']):
+                self._save.name = save_name
+
+        self.saves[self._save.name] = self._save
+        print('\nSaves saved at', Data.save(filename=self.saves_filename, data=self.saves))
 
 
 game = Game()
@@ -127,6 +142,7 @@ if __name__ == '__main__':
                                     'My Garden',
                                     'Market',
                                     'End turn',
+                                    'Save and Quit'
                                 ], lambda x: x).index:
                 case 1:
                     clear()
@@ -143,6 +159,10 @@ if __name__ == '__main__':
                 case 4:
                     clear()
                     actions = 0
+                case 5:
+                    clear()
+                    game.save()
+                    exit()
 
         game.end_turn()
 
