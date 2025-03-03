@@ -4,7 +4,7 @@ from typing import Callable
 from data.save import Data
 from exceptions import PlantationException
 from plants.add.fertilizer import FertilizerType
-from plants.plant import PlantType
+from plants.plant import PlantType, Plant
 from plants.plantation import Plantation
 from plants.soil import SoilType
 from user.user import User
@@ -156,6 +156,56 @@ class Garden(Data):
 
         print(f'There are no plants to maintain in the {self.name} garden.\n')
         return False
+
+    def new_plantation(self, user: User) -> bool:
+        size = Prompt.get('Select the size of the plantation (between 1 and 10):',
+                          expected_type=int,
+                          excluded_condition=lambda x: (not 0 < x <= 10) or not isinstance(x, int))
+        cost = 10 * size
+
+        if Prompt.get_bool(f'Price: {cost:.2f}$ - Confirm ? [y/n]:', true_values=['y', 'yes'],
+                           false_values=['n', 'no']):
+            # proceed payment
+            pass
+        else:
+            print('Transaction cancelled')
+            return False
+
+        print()
+        soil_type = SoilType.select()
+        print()
+
+        plant: Plant | None = None
+        plant_new = Prompt.get_bool(
+            prompt=f'Would you like to add a seed? It will cost you an extra $2.5 [y/n]:',
+            true_values=['yes', 'y'], false_values=['n', 'no'])
+        plant_payment_done = False
+
+        while True:
+            if plant_new:
+                # proceed payment
+                plant = PlantType.select()()
+                plant_payment_done = True
+
+            try:
+                plantation = Plantation(
+                    size=size,
+                    soil=soil_type(),
+                    plant=plant
+                )
+                self + plantation
+                print(f'\nPlantation ({plantation}) added to the {self.name} garden')
+                return True
+            except PlantationException.Seed as ex:
+                print(f'Error on plant type selection. {ex.message.title()}.\n')
+                plant = None
+                plant_new = Prompt.get_bool(
+                    prompt=f'Would you like to select another plant ? {"It will cost you an extra $2.5" if not plant_payment_done else ""}[y/n]:',
+                    true_values=['yes', 'y'], false_values=['n', 'no'])
+
+            if not plant_new and plant_payment_done:
+                # refund $2.5 to user
+                pass
 
     def plant_new(self) -> bool:
         if len(self.plantations(Garden.PlantationSelectType.SOILED_NO_SEED)) == 0:

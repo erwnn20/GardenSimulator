@@ -58,11 +58,14 @@ class Game:
     def manage(self) -> bool:
         match self.prompt.select('What do you want to do ?',
                                  [
+                                     'Buy a new plantation',
                                      'Plant a new seed',
                                      'Uproot a plant',
                                      'Change soil',
                                      'Exit'
                                  ], lambda x: x).element:
+            case 'Buy a new plantation':
+                return game.save.garden.new_plantation(self.save.user)
             case 'Plant a new seed':
                 return game.save.garden.plant_new()
             case 'Uproot a plant':

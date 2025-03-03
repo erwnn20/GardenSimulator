@@ -11,18 +11,32 @@ class Plantation:
     def __init__(self, *, size: int,
                  soil: Soil,
                  plant: Plant | None = None,
-                 max_water_content: float,
+                 max_water_content: float | None = None,
                  water_content: float = 0):
         self.size = size
         self.soil = soil
-        self.max_water_content = max_water_content
+        self.max_water_content = max_water_content if max_water_content else self._calculate_max_water_content(size)
         self.water_content = water_content
-        self.plant = plant
+
+        self.plant: Plant | None = None
+        if plant: self.plant_seed(plant)
 
     def __str__(self) -> str:
         return (f'Soil: {type(self.soil).__name__} | '
                 f'{f"Plant: {self.plant}" if self.plant else f"No plant (size: {self.size})"} | '
                 f'Water: {self.water_content:.2f}/{self.max_water_content:.2f} L')
+
+    @staticmethod
+    def _calculate_max_water_content(size: int) -> float:
+        if not (1 <= size <= 10):
+            raise ValueError("La taille de la plantation doit être entre 1 et 10.")
+
+        if size <= 3:
+            return 3.5 * size
+        elif size <= 6:
+            return 3 * size
+        else:
+            return 2.5 * size
 
     @property
     def is_empty(self) -> bool:
