@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class Plant(ABC):
     def __init__(self, *,
                  emoji: str = '🌱',
-                 product: Product = Product.PRODUCT,
+                 product: Product,
                  water_needs: confloat(gt=0),
                  growth_rate: confloat(gt=0, le=15),
                  size: conint(gt=0, le=10),

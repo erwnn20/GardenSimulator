@@ -2,50 +2,107 @@ from enum import Enum
 from pydantic.types import confloat, conint
 
 from plants.plant import Plant
+from product.product import Product
 from utils.prompt import Prompt
 
 
 class Vegetable(Plant):
-    def __init__(self, *, water_needs: confloat(gt=1.5), growth_rate: confloat(gt=7, le=15), size: conint(ge=2, le=6),
-                 fertilizer_limit: confloat(gt=0, le=1.5), growth: float = 0, fertilizer_quantity: float = 0):
-        super().__init__(water_needs=water_needs, growth_rate=growth_rate, size=size, fertilizer_limit=fertilizer_limit,
-                         growth=growth, fertilizer_quantity=fertilizer_quantity)
+    def __init__(self, *,
+                 emoji: str = '🥦',
+                 product: Product,
+                 water_needs: confloat(gt=1.5),
+                 growth_rate: confloat(gt=7, le=15),
+                 size: conint(ge=2, le=6),
+                 fertilizer_limit: confloat(gt=0, le=1.5),
+                 growth: float = 0, fertilizer_quantity: float = 0):
+        super().__init__(
+            emoji=emoji,
+            product=product,
+            water_needs=water_needs,
+            growth_rate=growth_rate,
+            size=size,
+            fertilizer_limit=fertilizer_limit,
+            growth=growth,
+            fertilizer_quantity=fertilizer_quantity
+        )
 
 
 class Carrot(Vegetable):
     def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
-        super().__init__(water_needs=2.0, growth_rate=10, size=2, fertilizer_limit=1.2,
-                         growth=growth, fertilizer_quantity=fertilizer_quantity)
+        super().__init__(
+            emoji='🥕',
+            product=Product.CARROT,
+            water_needs=2.0,
+            growth_rate=10,
+            size=2,
+            fertilizer_limit=1.2,
+            growth=growth, fertilizer_quantity=fertilizer_quantity
+        )
 
 
 class Tomato(Vegetable):
     def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
-        super().__init__(water_needs=2.5, growth_rate=12, size=4, fertilizer_limit=1.5,
-                         growth=growth, fertilizer_quantity=fertilizer_quantity)
+        super().__init__(
+            emoji='🍅',
+            product=Product.TOMATO,
+            water_needs=2.5,
+            growth_rate=12,
+            size=4,
+            fertilizer_limit=1.5,
+            growth=growth, fertilizer_quantity=fertilizer_quantity
+        )
 
 
 class Lettuce(Vegetable):
     def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
-        super().__init__(water_needs=1.8, growth_rate=9, size=3, fertilizer_limit=1.0,
-                         growth=growth, fertilizer_quantity=fertilizer_quantity)
+        super().__init__(
+            emoji='🥬',
+            product=Product.LETTUCE,
+            water_needs=1.8,
+            growth_rate=9,
+            size=3,
+            fertilizer_limit=1.0,
+            growth=growth, fertilizer_quantity=fertilizer_quantity
+        )
 
 
 class Potato(Vegetable):
     def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
-        super().__init__(water_needs=2.2, growth_rate=8, size=3, fertilizer_limit=1.3,
-                         growth=growth, fertilizer_quantity=fertilizer_quantity)
+        super().__init__(
+            emoji='🥔',
+            product=Product.POTATO,
+            water_needs=2.2,
+            growth_rate=8,
+            size=3,
+            fertilizer_limit=1.3,
+            growth=growth, fertilizer_quantity=fertilizer_quantity
+        )
 
 
 class Pepper(Vegetable):
     def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
-        super().__init__(water_needs=2.8, growth_rate=13, size=5, fertilizer_limit=1.4,
-                         growth=growth, fertilizer_quantity=fertilizer_quantity)
+        super().__init__(
+            emoji='🌶️',
+            product=Product.PEPPER,
+            water_needs=2.8,
+            growth_rate=13,
+            size=5,
+            fertilizer_limit=1.4,
+            growth=growth, fertilizer_quantity=fertilizer_quantity
+        )
 
 
 class Cucumber(Vegetable):
     def __init__(self, *, growth: float = 0, fertilizer_quantity: float = 0):
-        super().__init__(water_needs=3.0, growth_rate=14, size=6, fertilizer_limit=1.5,
-                         growth=growth, fertilizer_quantity=fertilizer_quantity)
+        super().__init__(
+            emoji='🥒',
+            product=Product.CUCUMBER,
+            water_needs=3.0,
+            growth_rate=14,
+            size=6,
+            fertilizer_limit=1.5,
+            growth=growth, fertilizer_quantity=fertilizer_quantity
+        )
 
 
 class VegetableType(Enum):
