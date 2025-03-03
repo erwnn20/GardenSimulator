@@ -99,12 +99,6 @@ class PlantType(Enum):
     VEGETABLE = VegetableType
     HERB = HerbType
 
-    def __str__(self) -> str:
-        print(f"self.name = {self.name}")          # Nom de l'Enum
-        print(f"self.value = {self.value}")        # Valeur stockée dans l'Enum (qui est un autre Enum)
-        # print(f"self.value.name = {self.value.name}")  # Nom du type imbriqué
-        return self._name_.capitalize()
-
     @staticmethod
     def select() -> type[Plant]:
         return Prompt.select(

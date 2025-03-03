@@ -16,7 +16,7 @@ class Plantation:
         self.size = size
         self.soil = soil
         self.max_water_content = max_water_content if max_water_content else self._calculate_max_water_content(size)
-        self.water_content = water_content
+        self.water_content = min(water_content, self.max_water_content)
 
         self.plant: Plant | None = None
         if plant: self.plant_seed(plant)

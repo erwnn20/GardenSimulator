@@ -6,6 +6,7 @@ from data.save import Save
 from plants.garden import Garden
 from plants.plantation import Plantation
 from plants.soil import SoilType
+from user.user import User
 from utils.prompt import Prompt
 
 clear = lambda: os.system('cls')
@@ -32,9 +33,11 @@ class Game:
             case 1:
                 self.save = Save(
                     name='',
-                    user=None,
-                    garden=Garden(input('Enter garden name : '),
-                                  plantations=[Plantation(size=5, soil=random.choice(list(SoilType)).value())]),
+                    user=User(name=Prompt.get('Enter your name : ', expected_type=str), money=12.5),
+                    garden=Garden(
+                        Prompt.get('Enter garden name : ', expected_type=str),
+                        plantations=[Plantation(size=5, soil=random.choice(list(SoilType)).value(), water_content=10)]
+                    ),
                 )
             case 2:
                 self.save = self._select_save()
@@ -56,6 +59,9 @@ class Game:
                 return game.save.garden.manage(game.save.user)
             case _:
                 return False
+
+    def user(self):
+        print(self.save.user)
 
 
 game = Game()
