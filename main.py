@@ -56,7 +56,7 @@ class Game:
             case 'Pruning/Maintenance':
                 return game.save.garden.maintain()
             case 'Exit':
-                return True
+                pass
         return False
 
     def manage(self) -> bool:
@@ -93,8 +93,8 @@ if __name__ == '__main__':
     while True:
         game.select_save()
 
-        end_turn = False
-        while not end_turn:
+        actions = 3
+        while actions > 0:
             clear()
             print(f'Your garden: {game.save.garden}\n')
 
@@ -106,6 +106,6 @@ if __name__ == '__main__':
                                          'Save and Quit',
                                      ], lambda x: x).index:
                 case 1:
-                    end_turn = game.maintain()
+                    actions -= 1 if game.maintain() else 0
                 case 2:
-                    end_turn = game.manage()
+                    actions -= 1 if game.manage() else 0
