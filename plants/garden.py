@@ -104,18 +104,20 @@ class Garden(Data):
 
             water: float | None = None
             if all_plants:
-                water = float(Prompt.get(
+                water = Prompt.get(
                     prompt='Enter the amount of water you want to use per plant :',
+                    expected_type=float,
                     excluded_condition=lambda x: x < 0.0
-                ))
+                )
 
             for plant in plants:
                 if not all_plants: print()
-                plant.watering_up(water if all_plants else float(Prompt.get(
+                plant.watering_up(water if all_plants else Prompt.get(
                     prompt=f'{type(plant).__name__}: {plant_str(plant)}\n'
                            'Enter the amount of water you want to use for this plant:',
+                    expected_type=float,
                     excluded_condition=lambda x: x < 0.0
-                )))
+                ))
 
             print(f"\nYou've watered {len(plants)} plants in the {self.name} garden.\n")
             return True
